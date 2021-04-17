@@ -3,8 +3,8 @@ let cowinPortalLoginPageUrl = "https://selfregistration.cowin.gov.in/";
 let instance;
 let tab;
 let { sendMail } = require("./appointmentMails");
-let { logoutUser } = require("./utils/common");
-let { confirmationMailSubject } = require("./utils/constants");
+let { logoutUser } = require("../utils/common");
+let { confirmationMailSubject } = require("../utils/constants");
 
 let browserInstancePromise = puppeteer.launch({
     headless: false,

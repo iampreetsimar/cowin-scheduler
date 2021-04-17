@@ -1,12 +1,12 @@
 let puppeteer = require("puppeteer");
 let cowinPortalLoginPageUrl = "https://selfregistration.cowin.gov.in/";
-let { waitAndClick, typeOTP, logoutUser, sleep } = require("./utils/common");
+let { waitAndClick, typeOTP, logoutUser, sleep } = require("../utils/common");
 let { sendMail } = require("./appointmentMails");
-let { deleteUserDetailsMailBody, deleteUserDetailsMailSubject } = require("./utils/constants");
+let { cancellationMailBody, cancellationMailSubject } = require("../utils/constants");
 let instance;
 let tab;
 
-function deleteUserDetails(data) {
+function cancelAppointment(data) {
     return new Promise(function(resolve, reject) {
         let browserInstancePromise = puppeteer.launch({
             headless: false,
@@ -50,29 +50,29 @@ function deleteUserDetails(data) {
                 return sleep(5000);
             }).then(function() {
                 console.log("...user logged in");
-                let deletionPromise = waitAndClick(tab, "ion-icon[tooltip='Delete Individual']", 2000);
-                return deletionPromise;
+                let cancelPromise = waitAndClick(tab, "ion-icon[tooltip='Cancel Appointment']", 2000);
+                return cancelPromise;
             }).then(function() {
                 console.log("...confirmation pop up opens");
-                let confirmDeletion = waitAndClick(tab, "button[class='swal2-confirm swal2-styled']", 2000);
-                return confirmDeletion;
+                let confirmCancellation = waitAndClick(tab, "button[class='swal2-confirm swal2-styled']", 2000);
+                return confirmCancellation;
             }).then(function() {
-                console.log("...user details deleted");
-                return sleep(3000);
+                console.log("...appointment cancelled");
+                return tab.waitForSelector("ion-icon[tooltip='Delete Individual']", { visible: true });
             }).then(function() {
-                console.log("...sending user details deletion confirmation on mail");
-                let sendUserDeletedConfirmationMail = sendMail({ 
+                console.log("...sending cancellation confirmation on mail");
+                let sendCancellationConfirmationMail = sendMail({ 
                     email: data.email, 
-                    subject: deleteUserDetailsMailSubject,
-                    mailBody: deleteUserDetailsMailBody 
+                    subject: cancellationMailSubject,
+                    mailBody: cancellationMailBody 
                 });
-                return sendUserDeletedConfirmationMail;
+                return sendCancellationConfirmationMail;
             }).then(function() {
-                console.log("...user details deleted mail sent");
+                console.log("...cancellation mail sent");
                 let logoutPromise = logoutUser(tab);
                 return logoutPromise;
             }).then(function() {
-                resolve(deleteUserDetailsMailBody);
+                resolve(cancellationMailBody);
             }).catch(function(err) {
                 reject(err);
             });
@@ -80,5 +80,5 @@ function deleteUserDetails(data) {
 }
 
 module.exports = {
-    deleteUserDetails: deleteUserDetails
+    cancelAppointment: cancelAppointment
 };

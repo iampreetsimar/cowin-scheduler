@@ -1,5 +1,5 @@
-let { cancelAppointment } = require("./cancelAppointment");
-let { deleteUserDetails } = require("./deleteUserDetails");
+let { cancelAppointment } = require("./features/cancelAppointment");
+let { deleteUserDetails } = require("./features/deleteUserDetails");
 let { loginUser } = require("./loginUser");
 let { registerUser } = require("./registerUser");
 
