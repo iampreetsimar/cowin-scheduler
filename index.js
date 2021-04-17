@@ -1,5 +1,7 @@
 let { cancelAppointment } = require("./cancelAppointment");
 let { deleteUserDetails } = require("./deleteUserDetails");
+let { loginUser } = require("./loginUser");
+let { registerUser } = require("./registerUser");
 
 async function cancellation() {
     let response;
@@ -25,15 +27,33 @@ async function deleteUser() {
     }
 }; 
 
-(async function login() {
+async function login() {
     let response;
     try {
-        response = await loginUser({ phone: "9999602530" });
-        console.log(response);
+        await loginUser({ phone: "9999602530" });
     } catch(err) {
         response = err.message;
     } finally {
         return response;
     }
-})(); 
+}; 
+
+async function register() {
+    let response;
+    try {
+        await registerUser({ 
+            phone: "9999602530", 
+            photoId: "AadhaarCard",
+            photoIdNumber: "666666666666",
+            name: "Simarpreet Singh",
+            gender: "Male",
+            birthYear: "1961",
+            pinCode: "110008"
+        });
+    } catch(err) {
+        response = err.message;
+    } finally {
+        return response;
+    }
+}; 
 

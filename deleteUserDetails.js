@@ -72,7 +72,7 @@ function deleteUserDetails(data) {
                 let logoutPromise = logoutUser(tab);
                 return logoutPromise;
             }).then(function() {
-                resolve(cancellationMailBody);
+                resolve(deleteUserDetailsMailBody);
             }).catch(function(err) {
                 reject(err);
             });

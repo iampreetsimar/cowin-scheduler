@@ -1,7 +1,7 @@
 let puppeteer = require("puppeteer");
 let cowinPortalLoginPageUrl = "https://selfregistration.cowin.gov.in/";
 let { waitAndClick, typeOTP, logoutUser, sleep } = require("./utils/common");
-let { cancellationMail } = require("./appointmentMails");
+let { sendMail } = require("./appointmentMails");
 let { cancellationMailBody, cancellationMailSubject } = require("./utils/constants");
 let instance;
 let tab;
@@ -61,7 +61,7 @@ function cancelAppointment(data) {
                 return tab.waitForSelector("ion-icon[tooltip='Delete Individual']", { visible: true });
             }).then(function() {
                 console.log("...sending cancellation confirmation on mail");
-                let sendCancellationConfirmationMail = cancellationMail({ 
+                let sendCancellationConfirmationMail = sendMail({ 
                     email: data.email, 
                     subject: cancellationMailSubject,
                     mailBody: cancellationMailBody 

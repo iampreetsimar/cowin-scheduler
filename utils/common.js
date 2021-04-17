@@ -9,8 +9,8 @@ function logoutUser(tab) {
             .then(function() {
                 console.log("...user logged out");
                 resolve();
-            }).catch(function() {
-                reject();
+            }).catch(function(err) {
+                reject(err);
             })
     });
 }
@@ -28,8 +28,8 @@ function waitAndClick(tab, selector, delayVal = 500) {
                 return waitForClickPromise;
             }).then(function() {
                 resolve();
-            }).catch(function() {
-                reject();
+            }).catch(function(err) {
+                reject(err);
             })
     });
 }
@@ -51,8 +51,8 @@ function typeOTP(tab) {
             .then(function() {
                 console.log("...OTP filled");
                 resolve();
-            }).catch(function() {
-                reject();
+            }).catch(function(err) {
+                reject(err);
             })
     });
 }
@@ -69,9 +69,29 @@ function sleep(time) {
     })
 }
 
+/*
+    INPUT - tab, selector, input to type
+    OUTPUT - waits for selector to appear on page and types in it
+*/
+function waitAndType(tab, selector, input) {
+    return new Promise(function(resolve, reject) {
+        let waitForClickSelectorPromise = waitAndClick(tab, selector);
+        waitForClickSelectorPromise
+            .then(function() {
+                let typeInputPromise = tab.type(selector, input, { delay: 100 });
+                return typeInputPromise;
+            }).then(function() {
+                resolve();
+            }).catch(function(err) {
+                reject(err);
+            })
+    });
+}
+
 module.exports = {
     logoutUser: logoutUser,
     typeOTP: typeOTP,
     waitAndClick: waitAndClick,
+    waitAndType: waitAndType,
     sleep: sleep
 };

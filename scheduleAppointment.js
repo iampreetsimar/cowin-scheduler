@@ -2,8 +2,9 @@ let puppeteer = require("puppeteer");
 let cowinPortalLoginPageUrl = "https://selfregistration.cowin.gov.in/";
 let instance;
 let tab;
-let { confirmationMail } = require("./appointmentMails");
+let { sendMail } = require("./appointmentMails");
 let { logoutUser } = require("./utils/common");
+let { confirmationMailSubject } = require("./utils/constants");
 
 let browserInstancePromise = puppeteer.launch({
     headless: false,
@@ -21,7 +22,7 @@ browserInstancePromise
         console.log("...opening register/signin user page");
         return portalPagePromise;
     }).then(function() {
-        let inputPhonePromise = waitAndClick("#mat-input-0");
+        let inputPhonePromise = waitAndClick(tab, "#mat-input-0");
         return inputPhonePromise;
     }).then(function() {
         console.log("...typing phone");
@@ -29,19 +30,19 @@ browserInstancePromise
         return typeNumberPromise;
     }).then(function() {
         console.log("...click on get OTP");
-        let getOTPPromise = waitAndClick(".covid-button-desktop.ion-text-center");
+        let getOTPPromise = waitAndClick(tab, ".covid-button-desktop.ion-text-center");
         return getOTPPromise;
     }).then(function() {
         console.log("...waiting for OTP");
-        let otpPromise = waitAndClick("#mat-input-1");
+        let otpPromise = waitAndClick(tab, "#mat-input-1");
         return otpPromise;
     }).then(function() {
         console.log("...typing OTP");
-        let typeOTPPromise = typeOTP();
+        let typeOTPPromise = typeOTP(tab);
         return typeOTPPromise;
     }).then(function() {
         console.log("...click on verify OTP");
-        let verifyOTPPromise = waitAndClick("ion-button[class='next-btn vac-btn md button button-solid ion-activatable ion-focusable hydrated']");
+        let verifyOTPPromise = waitAndClick(tab, "ion-button[class='next-btn vac-btn md button button-solid ion-activatable ion-focusable hydrated']");
         return verifyOTPPromise;
     }).then(function() {
         console.log("...user logged in");
@@ -49,11 +50,11 @@ browserInstancePromise
         return selectIDPromise;
     }).then(function() {
         console.log("...id chosen");
-        let typeIdPromise = waitAndType("input[formcontrolname='photo_id_number']", "666666666666");
+        let typeIdPromise = waitAndType(tab, "input[formcontrolname='photo_id_number']", "666666666666");
         return typeIdPromise;
     }).then(function() {
         console.log("...typing id number");
-        let typeNamePromise = waitAndType("input[formcontrolname='name']", "Simarpreet Singh");
+        let typeNamePromise = waitAndType(tab, "input[formcontrolname='name']", "Simarpreet Singh");
         return typeNamePromise;
     }).then(function() {
         console.log("...typing name");
@@ -61,30 +62,30 @@ browserInstancePromise
         return selectRadioPromise;
     }).then(function() {
         console.log("...selected gender");
-        let typeBirthYearPromise = waitAndType("input[formcontrolname='birth_year']", "1961");
+        let typeBirthYearPromise = waitAndType(tab, "input[formcontrolname='birth_year']", "1961");
         return typeBirthYearPromise;
     }).then(function() {
         console.log("...typing year");
-        let registerPromise = waitAndClick(".covid-button-desktop.ion-text-end.button-container .register-btn");
+        let registerPromise = waitAndClick(tab, ".covid-button-desktop.ion-text-end.button-container .register-btn");
         return registerPromise;
     }).then(function() {
         console.log("...user registered");
         let sleepPromise = sleep(7000);
         return sleepPromise;
     }).then(function() {
-        let scheduleAppointment = waitAndClick(".btnlist.ng-star-inserted a");
+        let scheduleAppointment = waitAndClick(tab, ".btnlist.ng-star-inserted a");
         return scheduleAppointment;
     }).then(function() {
         console.log("...clicked on schedule appointment");
-        let scheduleFinalPromise = waitAndClick(".covid-button-desktop.ion-text-end.book-btn");
+        let scheduleFinalPromise = waitAndClick(tab, ".covid-button-desktop.ion-text-end.book-btn");
         return scheduleFinalPromise;
     }).then(function() {
         console.log("...clicked on schedule appointment final");
-        let searchByPincodePromise = waitAndType("input[formcontrolname='pincode']", "110008");
+        let searchByPincodePromise = waitAndType(tab, "input[formcontrolname='pincode']", "110008");
         return searchByPincodePromise;
     }).then(function() {
         console.log("...typing pincode");
-        let searchButtonPromise = waitAndClick(".pin-search-btn.md.button.button-solid.ion-activatable.ion-focusable.hydrated");
+        let searchButtonPromise = waitAndClick(tab, ".pin-search-btn.md.button.button-solid.ion-activatable.ion-focusable.hydrated");
         return searchButtonPromise;
     }).then(function() {
         console.log("...search button clicked");
@@ -96,7 +97,7 @@ browserInstancePromise
         return timeSlotPromise;
     }).then(function() {
         console.log("...selected time slot");
-        let confirmAppointmentPromise = waitAndClick(".covid-button-desktop.ion-text-end.book-btn.button-container__right .confirm-btn");
+        let confirmAppointmentPromise = waitAndClick(tab, ".covid-button-desktop.ion-text-end.book-btn.button-container__right .confirm-btn");
         return confirmAppointmentPromise;
     }).then(function() {
         console.log("...appointment confirmed");
@@ -324,12 +325,16 @@ function sendConfirmationMail(appointmentDetails) {
             reject();
 
         appointmentDetails = createMailBody(appointmentDetails);
-        let appointmentConfirmationMail = confirmationMail(appointmentDetails);
+        let appointmentConfirmationMail = sendMail({ 
+            email: "simar94.singh@gmail.com", 
+            subject: confirmationMailSubject,
+            mailBody: appointmentDetails 
+        });
         appointmentConfirmationMail
             .then(function() {
                 resolve();
-            }).catch(function() {
-                reject();
+            }).catch(function(err) {
+                reject(err);
             })
     })
 }
@@ -342,26 +347,3 @@ function createMailBody(appointmentDetails) {
     return appointmentDetails;
 }
 
-/*
-    DROPDOWN
-    mat-option[id='mat-option-0'] - Aadhaar Card
-    mat-option[id='mat-option-1'] - DL
-    mat-option[id='mat-option-2'] - PAN Card
-    mat-option[id='mat-option-3'] - Passport
-    mat-option[id='mat-option-4'] - Pension Passbook
-    mat-option[id='mat-option-5'] - NPR Smart Card
-    mat-option[id='mat-option-6'] - Voter ID
-
-    RADIO
-    mat-radio-2-input - Male
-    mat-radio-3-input - Female
-    mat-radio-4-input - Others
-
-    mat-selection-list[formcontrolname="center_id"] 
-    document.querySelectorAll("div[class='mat-list-text']") if visible
-
-    Centers
-    document.querySelectorAll(".slots-box.ng-star-inserted a") if innerText != ""
-
-
-*/

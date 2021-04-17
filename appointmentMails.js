@@ -13,39 +13,6 @@ function createTransporter() {
     return transporter;
 }
 
-function confirmationMail(appointmentDetails) {
-    return new Promise(function(resolve, reject) {
-        let transporter = createTransporter();
-        let infoPromise = transporter.sendMail({
-            from: '"Cowin Scheduler " <cowin.appointment.scheduler@gmail.com>', // sender address
-            to: "simar94.singh@gmail.com", // list of receivers
-            subject: "Cowin Scheduler - Covid Vaccination Appointment Confirmation", // Subject line
-            text: appointmentDetails // plain text body
-        });
-
-        infoPromise
-            .then(function(){
-                resolve();
-            }).catch(function() {
-                reject();
-            })
-    });
-}
-
-function cancellationMail(data) {
-    return new Promise(function(resolve, reject) {
-        let transporter = createTransporter();
-        let mailOptions = getMailOptions(data);
-        let infoPromise = transporter.sendMail(mailOptions);
-        infoPromise
-            .then(function(){
-                resolve();
-            }).catch(function() {
-                reject();
-            })
-    });
-}
-
 function sendMail(data) {
     return new Promise(function(resolve, reject) {
         let transporter = createTransporter();
@@ -54,8 +21,8 @@ function sendMail(data) {
         infoPromise
             .then(function(){
                 resolve();
-            }).catch(function() {
-                reject();
+            }).catch(function(err) {
+                reject(err);
             })
     });
 }
@@ -70,8 +37,6 @@ function getMailOptions(data) {
 }
 
 module.exports = {
-    confirmationMail: confirmationMail,
-    cancellationMail: cancellationMail,
     sendMail: sendMail
 }
 
