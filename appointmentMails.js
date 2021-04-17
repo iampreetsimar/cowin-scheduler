@@ -32,16 +32,11 @@ function confirmationMail(appointmentDetails) {
     });
 }
 
-function cancellationMail() {
+function cancellationMail(data) {
     return new Promise(function(resolve, reject) {
         let transporter = createTransporter();
-        let infoPromise = transporter.sendMail({
-            from: '"Cowin Scheduler " <cowin.appointment.scheduler@gmail.com>', // sender address
-            to: "simar94.singh@gmail.com", // list of receivers
-            subject: "Cowin Scheduler - Covid Vaccination Appointment Cancelled", // Subject line
-            text: "Your appoinment has been cancelled on the Cowin Portal" // plain text body
-        });
-
+        let mailOptions = getMailOptions(data);
+        let infoPromise = transporter.sendMail(mailOptions);
         infoPromise
             .then(function(){
                 resolve();
@@ -49,6 +44,15 @@ function cancellationMail() {
                 reject();
             })
     });
+}
+
+function getMailOptions(data) {
+    return {
+        from: '"' + mailerCredentials.name + '" <' + mailerCredentials.email + '>', // sender address
+        to: data.email, // receiver address
+        subject: data.subject, // Subject line
+        text: data.mailBody // plain text body
+    };
 }
 
 module.exports = {
