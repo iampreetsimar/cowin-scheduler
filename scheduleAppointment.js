@@ -46,13 +46,49 @@ browserInstancePromise
         return verifyOTPPromise;
     }).then(function() {
         console.log("...user logged in");
-        let selectIDPromise = waitAndClick("#mat-select-0");
+        let selectIDPromise = selectID("mat-select-value-1", 5000, "mat-option-0");
         return selectIDPromise;
     }).then(function() {
-        console.log("...choose an id card");
-        let chooseIdPromise = tab.click("ion-item[class='mat-main-field item md ion-focusable hydrated']");
-        return chooseIdPromise;
-        // , "mat-option-1")
+        console.log("...id chosen");
+        let typeIdPromise = waitAndType("input[formcontrolname='photo_id_number']", "666666666666");
+        return typeIdPromise;
+    }).then(function() {
+        console.log("...typing id number");
+        let typeNamePromise = waitAndType("input[formcontrolname='name']", "Simarpreet Singh");
+        return typeNamePromise;
+    }).then(function() {
+        console.log("...typing name");
+        let selectRadioPromise = selectRadio("mat-radio-4-input");
+        return selectRadioPromise;
+    }).then(function() {
+        console.log("...selected gender");
+        let typeBirthYearPromise = waitAndType("input[formcontrolname='birth_year']", "1961");
+        return typeBirthYearPromise;
+    }).then(function() {
+        console.log("...typing year");
+        let registerPromise = waitAndClick(".covid-button-desktop.ion-text-end.button-container .register-btn");
+        return registerPromise;
+    }).then(function() {
+        console.log("...user registered");
+        let sleepPromise = sleep(7000);
+        return sleepPromise;
+    }).then(function() {
+        let scheduleAppointment = waitAndClick(".btnlist.ng-star-inserted a");
+        return scheduleAppointment;
+    }).then(function() {
+        console.log("...clicked on schedule appointment");
+        let scheduleFinalPromise = waitAndClick(".covid-button-desktop.ion-text-end.book-btn");
+        return scheduleFinalPromise;
+    }).then(function() {
+        console.log("...clicked on schedule appointment final");
+        let searchByPincodePromise = waitAndType("input[formcontrolname='pincode']", "110008");
+        return searchByPincodePromise;
+    }).then(function() {
+        console.log("...typing pincode");
+        let searchButtonPromise = waitAndClick(".pin-search-btn.md.button.button-solid.ion-activatable.ion-focusable.hydrated");
+        return searchButtonPromise;
+    }).then(function() {
+        console.log("...search button clicked");
     }).catch(function(err) {
         console.log(err);
     })
@@ -62,12 +98,12 @@ browserInstancePromise
     INPUT - selector
     OUTPUT - waits for selector to appear on page and clicks on it
 */
-function waitAndClick(selector) {
+function waitAndClick(selector, delayVal = 500) {
     return new Promise(function(resolve, reject) {
         let waitForSelectorPromise = tab.waitForSelector(selector, { visible: true });
         waitForSelectorPromise
             .then(function() {
-                let waitForClickPromise = tab.click(selector, { delay: 500 });
+                let waitForClickPromise = tab.click(selector, { delay: delayVal });
                 return waitForClickPromise;
             }).then(function() {
                 resolve();
@@ -84,8 +120,8 @@ function waitAndClick(selector) {
 */
 function waitAndType(selector, input) {
     return new Promise(function(resolve, reject) {
-        let waitForSelectorPromise = tab.waitForSelector(selector, { visible: true });
-        waitForSelectorPromise
+        let waitForClickSelectorPromise = waitAndClick(selector);
+        waitForClickSelectorPromise
             .then(function() {
                 let typeInputPromise = tab.type(selector, input, { delay: 200 });
                 return typeInputPromise;
@@ -114,23 +150,68 @@ function typeOTP() {
     });
 }
 
-function selectID(selector, idName) {
+function sleep(time) {
     return new Promise(function(resolve, reject) {
-        function browserFunction(selector, idSelector) {
-            let idDropdown = document.querySelectorAll(selector);
-            idDropdown[0].click();
+        setTimeout(function() {
+            resolve();
+        }, time);
+    })
+}
 
-            document.querySelector(idSelector).click();
-        }
-
-        let evaluatePromise = tab.evaluate(browserFunction, selector, idSelector);
-        evaluatePromise
+function selectID(selector, delayVal, idSelector) {
+    return new Promise(function(resolve, reject) {
+        
+        let sleepPromise = sleep(delayVal);
+        sleepPromise
             .then(function() {
+                let waitForDropdownPromise = waitAndClick("#" + selector);
+                return waitForDropdownPromise;
+            }).then(function() {
+                function browserFunction(idSelector) {
+                    let optionId = document.getElementById(idSelector);
+                    optionId.click();
+                }
+
+                let evaluatePromise = tab.evaluate(browserFunction, idSelector);
+                return evaluatePromise;      
+            }).then(function() {
                 console.log("...selected ID");
             }).then(function() {
                 resolve();
-            })
+            });
+    });
+}
+
+function selectRadio(selector) {
+    return new Promise(function(resolve, reject) {
+        function selectRadioChoice(selector) {
+            let radioChoice = document.getElementById(selector);
+            radioChoice.click();
+        }
+          
+        let evaluatePromise = tab.evaluate(selectRadioChoice, selector);
+        evaluatePromise
+            .then(function() {
+                resolve();
+            });
     });
 }
 
 console.log("After");
+
+
+/*
+    DROPDOWN
+    mat-option[id='mat-option-0'] - Aadhaar Card
+    mat-option[id='mat-option-1'] - DL
+    mat-option[id='mat-option-2'] - PAN Card
+    mat-option[id='mat-option-3'] - Passport
+    mat-option[id='mat-option-4'] - Pension Passbook
+    mat-option[id='mat-option-5'] - NPR Smart Card
+    mat-option[id='mat-option-6'] - Voter ID
+
+    RADIO
+    mat-radio-2-input - Male
+    mat-radio-3-input - Female
+    mat-radio-4-input - Others
+*/
