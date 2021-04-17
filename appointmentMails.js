@@ -46,6 +46,20 @@ function cancellationMail(data) {
     });
 }
 
+function sendMail(data) {
+    return new Promise(function(resolve, reject) {
+        let transporter = createTransporter();
+        let mailOptions = getMailOptions(data);
+        let infoPromise = transporter.sendMail(mailOptions);
+        infoPromise
+            .then(function(){
+                resolve();
+            }).catch(function() {
+                reject();
+            })
+    });
+}
+
 function getMailOptions(data) {
     return {
         from: '"' + mailerCredentials.name + '" <' + mailerCredentials.email + '>', // sender address
@@ -57,6 +71,7 @@ function getMailOptions(data) {
 
 module.exports = {
     confirmationMail: confirmationMail,
-    cancellationMail: cancellationMail
+    cancellationMail: cancellationMail,
+    sendMail: sendMail
 }
 
