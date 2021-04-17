@@ -1,11 +1,12 @@
 let nodemailer = require("nodemailer");
+let { mailerCredentials } = require("./utils/credentials");
 
 function createTransporter() {
     let transporter = nodemailer.createTransport({
-        service: "gmail",
+        service: mailerCredentials.service,
         auth: {
-          user: "cowin.appointment.scheduler@gmail.com", 
-          pass: "cowinScheduler_2021", 
+          user: mailerCredentials.email, 
+          pass: mailerCredentials.password, 
         },
     });
 
@@ -24,7 +25,6 @@ function confirmationMail(appointmentDetails) {
 
         infoPromise
             .then(function(){
-                console.log("confirmation mail sent");
                 resolve();
             }).catch(function() {
                 reject();
@@ -44,7 +44,6 @@ function cancellationMail() {
 
         infoPromise
             .then(function(){
-                console.log("cancellation mail sent");
                 resolve();
             }).catch(function() {
                 reject();

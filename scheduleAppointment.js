@@ -4,8 +4,6 @@ let instance;
 let tab;
 let { confirmationMail } = require("./appointmentMails");
 
-console.log("Before");
-
 let browserInstancePromise = puppeteer.launch({
     headless: false,
     defaultViewport: null,
@@ -338,9 +336,6 @@ function createMailBody(appointmentDetails) {
     appointmentDetails = detailsArr.join("\n");
     return appointmentDetails;
 }
-
-console.log("After");
-
 
 /*
     DROPDOWN
