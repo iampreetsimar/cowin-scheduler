@@ -46,7 +46,7 @@ browserInstancePromise
         return verifyOTPPromise;
     }).then(function() {
         console.log("...user logged in");
-        let selectIDPromise = selectID("mat-select-value-1", 5000, "mat-option-0");
+        let selectIDPromise = selectPhotoIDInDropdown("mat-select-value-1", 5000, "mat-option-0");
         return selectIDPromise;
     }).then(function() {
         console.log("...id chosen");
@@ -89,6 +89,23 @@ browserInstancePromise
         return searchButtonPromise;
     }).then(function() {
         console.log("...search button clicked");
+        let selectCenterPromise = selectVaccinationCenter();
+        return selectCenterPromise;
+    }).then(function() {
+        console.log("...selected vaccination center");
+        let timeSlotPromise = selectTimeSlot();
+        return timeSlotPromise;
+    }).then(function() {
+        console.log("...selected time slot");
+        let confirmAppointmentPromise = waitAndClick(".covid-button-desktop.ion-text-end.book-btn.button-container__right .confirm-btn");
+        return confirmAppointmentPromise;
+    }).then(function() {
+        console.log("...appointment confirmed");
+        let appointmentDetails = getAppointmentDetails();
+        return appointmentDetails;
+    }).then(function(appointmentDetails) {
+        console.log(appointmentDetails);
+        console.log("...sending appointment details on mail");
     }).catch(function(err) {
         console.log(err);
     })
@@ -158,7 +175,7 @@ function sleep(time) {
     })
 }
 
-function selectID(selector, delayVal, idSelector) {
+function selectPhotoIDInDropdown(selector, delayVal, idSelector) {
     return new Promise(function(resolve, reject) {
         
         let sleepPromise = sleep(delayVal);
@@ -178,6 +195,8 @@ function selectID(selector, delayVal, idSelector) {
                 console.log("...selected ID");
             }).then(function() {
                 resolve();
+            }).catch(function() {
+                reject();
             });
     });
 }
@@ -193,6 +212,163 @@ function selectRadio(selector) {
         evaluatePromise
             .then(function() {
                 resolve();
+            });
+    });
+}
+
+function selectVaccinationCenter() {
+    return new Promise(function(resolve, reject) {
+        sleep(3000)
+            .then(function() {
+                return tab.waitForSelector("div[class='mat-list-text']", { visible: true });
+            }).then(function() {
+                function browserSelectCenter(centerRowsSelector, availableSlotsSelector) {
+                    let selectedSlot;
+                    let centerListCount = document.querySelectorAll(centerRowsSelector);
+                    if(centerListCount.length > 0) {
+                        for(let i = 0; i < centerListCount.length; i++) {
+                            let slotsForCurrentWeek = centerListCount[i].querySelectorAll(availableSlotsSelector);
+                            if(slotsForCurrentWeek.length > 0) {
+                                for(let j = 0; j < slotsForCurrentWeek.length; j++) {
+                                    if(slotsForCurrentWeek[j].innerText) {
+                                        selectedSlot = slotsForCurrentWeek[j];
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if(selectedSlot)
+                                break;  
+                        }
+                    } 
+                    
+                    if(selectedSlot)
+                        selectedSlot.click();
+                    else {
+                        throw new Error("No appointments available this week in your pincode");
+                    }
+                }
+
+                let evaluatePromise = tab.evaluate(browserSelectCenter, "div[class='mat-list-text']", ".slots-box.ng-star-inserted a");
+                return evaluatePromise;
+            }).then(function() {
+                resolve();
+            }).catch(function(err) {
+                reject(err);
+            }) 
+    })
+}
+
+function selectTimeSlot() {
+    return new Promise(function(resolve, reject) {
+        sleep(3000)
+            .then(function() {
+                return tab.waitForSelector(".time-slot-list .time-slot", { visible: true });
+            }).then(function() {
+                function browserPickTimeSlot(timeSlotListSelector) {
+                    let timeSlotList = document.querySelectorAll(timeSlotListSelector);
+                    if(timeSlotList.length > 0) {
+                        timeSlotList[0].click();
+                    } else {
+                        throw new Error("No time slot available");
+                    }
+                }
+
+                let evaluatePromise = tab.evaluate(browserPickTimeSlot, ".time-slot-list .time-slot");
+                return evaluatePromise;
+            }).then(function() {
+                resolve();
+            }).catch(function(err) {
+                reject(err);
+            });
+    });
+}
+
+function getAppointmentDetails() {
+    return new Promise(function(resolve, reject) {
+        let detailsSelector = tab.waitForSelector("ion-grid[class='aadhar-otp-submit-form md hydrated']", { visible: true });
+        detailsSelector
+            .then(function() {
+                function browserAppointmentDetails(selector) {
+                    let allDetails = document.querySelectorAll(selector);
+                    allDetails = allDetails[1];
+
+                    detailRows = allDetails.querySelectorAll("ion-row[class='md hydrated']");
+                    let confirmationMessage;
+                    let center;
+                    let date;
+                    let time;
+                    let preference;
+                    let name;
+                    let referenceId;
+                    let photoIdToCarry;
+                    let instructions;
+
+                    for(let i = 0; i < detailRows.length; i++) {
+                        if(i == 0) {
+                            let confirmationMessageElements = detailRows[i].getElementsByTagName("p");
+                            confirmationMessageElements.forEach(function(elem) {
+                                confirmationMessage += elem.innerText + "\n";
+                            })
+
+                            let individualDetailsList = detailRows[i].querySelectorAll("ion-col.md.hydrated']");
+                            for(let j = 0; j < individualDetailsList.length; j++) {
+                                switch(j) {
+                                    case 2:
+                                        center = individualDetailsList[j].innerText;
+                                        break;
+                                    case 3:
+                                        date = individualDetailsList[j].innerText;
+                                        break;
+                                    case 4:
+                                        time = individualDetailsList[j].innerText;
+                                        break;
+                                    case 5:
+                                        preference = individualDetailsList[j].innerText;
+                                        break;
+                                    case 6:
+                                        let tableDetails = individualDetailsList[j].querySelectorAll(".divTableCell");
+                                        for(let k = 0; k < tableDetails.length; k++) {
+                                            if(k == 1)
+                                                name = tableDetails[k].innerText;
+
+                                            if(k == 2)
+                                                referenceId = tableDetails[k].innerText;
+
+                                            if(k == 3)
+                                                photoIdToCarry = tableDetails[k].innerText;
+                                        }
+                                        break; 
+                                }
+                            } 
+
+                        } else if(i == 2) {
+                            instructions = detailRows[i].innerText;
+                        }
+                    }
+
+                    let appointmentDetailsObject = {
+                        confirmationMessage: confirmationMessage,
+                        center: center,
+                        date: date,
+                        time: time,
+                        preference: preference,
+                        name: name,
+                        photoIdToCarry: photoIdToCarry,
+                        referenceId: referenceId,
+                        instructions: instructions
+                    }
+
+                    console.log(appointmentDetailsObject);
+                    return appointmentDetailsObject;
+                };
+
+                let appointmentDetails = tab.evaluate(browserAppointmentDetails, "ion-grid[class='aadhar-otp-submit-form md hydrated']");
+                return appointmentDetails;
+            }).then(function(detailsObject) {
+                resolve(detailsObject);
+            }).catch(function() {
+                reject();
             });
     });
 }
@@ -214,4 +390,12 @@ console.log("After");
     mat-radio-2-input - Male
     mat-radio-3-input - Female
     mat-radio-4-input - Others
+
+    mat-selection-list[formcontrolname="center_id"] 
+    document.querySelectorAll("div[class='mat-list-text']") if visible
+
+    Centers
+    document.querySelectorAll(".slots-box.ng-star-inserted a") if innerText != ""
+
+
 */
