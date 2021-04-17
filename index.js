@@ -1,7 +1,7 @@
 let { cancelAppointment } = require("./features/cancelAppointment");
 let { deleteUserDetails } = require("./features/deleteUserDetails");
-let { loginUser } = require("./loginUser");
-let { registerUser } = require("./registerUser");
+let { loginUser } = require("./features/loginUser");
+let { registerUser } = require("./features/registerUser");
 
 async function cancellation() {
     let response;
@@ -15,7 +15,7 @@ async function cancellation() {
     }
 }; 
 
-async function deleteUser() {
+(async function deleteUser() {
     let response;
     try {
         response = await deleteUserDetails({ phone: "9999602530", email: "simar94.singh@gmail.com" });
@@ -25,7 +25,7 @@ async function deleteUser() {
     } finally {
         return response;
     }
-}; 
+})(); 
 
 async function login() {
     let response;

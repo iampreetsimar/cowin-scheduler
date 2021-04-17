@@ -1,7 +1,7 @@
 let puppeteer = require("puppeteer");
 let cowinPortalLoginPageUrl = "https://selfregistration.cowin.gov.in/";
-let { waitAndClick, typeOTP, sleep, waitAndType } = require("./utils/common");
-let { mappedPhotoIdSelector, mappedGenderRadioSelector } = require("./utils/constants");
+let { waitAndClick, typeOTP, sleep, waitAndType } = require("../utils/common");
+let { mappedPhotoIdSelector, mappedGenderRadioSelector } = require("../utils/constants");
 let instance;
 let tab;
 

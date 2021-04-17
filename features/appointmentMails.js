@@ -1,5 +1,5 @@
 let nodemailer = require("nodemailer");
-let { mailerCredentials } = require("./utils/credentials");
+let { mailerCredentials } = require("../utils/credentials");
 
 function createTransporter() {
     let transporter = nodemailer.createTransport({

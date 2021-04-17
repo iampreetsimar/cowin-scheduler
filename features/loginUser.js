@@ -1,6 +1,6 @@
 let puppeteer = require("puppeteer");
 let cowinPortalLoginPageUrl = "https://selfregistration.cowin.gov.in/";
-let { waitAndClick, typeOTP, sleep } = require("./utils/common");
+let { waitAndClick, typeOTP, sleep } = require("../utils/common");
 let instance;
 let tab;
 
