@@ -1,8 +1,8 @@
 let puppeteer = require("puppeteer");
-let cowinPortalHomePageUrl = "https://www.cowin.gov.in/home";
 let cowinPortalLoginPageUrl = "https://selfregistration.cowin.gov.in/";
 let instance;
 let tab;
+let { confirmationMail } = require("./appointmentMails");
 
 console.log("Before");
 
@@ -104,8 +104,11 @@ browserInstancePromise
         let appointmentDetails = getAppointmentDetails();
         return appointmentDetails;
     }).then(function(appointmentDetails) {
-        console.log(appointmentDetails);
         console.log("...sending appointment details on mail");
+        let sendAppointmentConfirmationMail = sendConfirmationMail(appointmentDetails.details);
+        return sendAppointmentConfirmationMail;
+    }).then(function() {
+        console.log("...confirmation mail sent");
     }).catch(function(err) {
         console.log(err);
     })
@@ -286,91 +289,54 @@ function selectTimeSlot() {
 
 function getAppointmentDetails() {
     return new Promise(function(resolve, reject) {
-        let detailsSelector = tab.waitForSelector("ion-grid[class='aadhar-otp-submit-form md hydrated']", { visible: true });
-        detailsSelector
+        sleep(2000)
             .then(function() {
                 function browserAppointmentDetails(selector) {
-                    let allDetails = document.querySelectorAll(selector);
-                    allDetails = allDetails[1];
-
-                    detailRows = allDetails.querySelectorAll("ion-row[class='md hydrated']");
-                    let confirmationMessage;
-                    let center;
-                    let date;
-                    let time;
-                    let preference;
-                    let name;
-                    let referenceId;
-                    let photoIdToCarry;
-                    let instructions;
-
-                    for(let i = 0; i < detailRows.length; i++) {
-                        if(i == 0) {
-                            let confirmationMessageElements = detailRows[i].getElementsByTagName("p");
-                            confirmationMessageElements.forEach(function(elem) {
-                                confirmationMessage += elem.innerText + "\n";
-                            })
-
-                            let individualDetailsList = detailRows[i].querySelectorAll("ion-col.md.hydrated']");
-                            for(let j = 0; j < individualDetailsList.length; j++) {
-                                switch(j) {
-                                    case 2:
-                                        center = individualDetailsList[j].innerText;
-                                        break;
-                                    case 3:
-                                        date = individualDetailsList[j].innerText;
-                                        break;
-                                    case 4:
-                                        time = individualDetailsList[j].innerText;
-                                        break;
-                                    case 5:
-                                        preference = individualDetailsList[j].innerText;
-                                        break;
-                                    case 6:
-                                        let tableDetails = individualDetailsList[j].querySelectorAll(".divTableCell");
-                                        for(let k = 0; k < tableDetails.length; k++) {
-                                            if(k == 1)
-                                                name = tableDetails[k].innerText;
-
-                                            if(k == 2)
-                                                referenceId = tableDetails[k].innerText;
-
-                                            if(k == 3)
-                                                photoIdToCarry = tableDetails[k].innerText;
-                                        }
-                                        break; 
-                                }
-                            } 
-
-                        } else if(i == 2) {
-                            instructions = detailRows[i].innerText;
-                        }
+                    let detailsSel = document.querySelectorAll(selector);
+                    if(detailsSel.length <= 1) {
+                        return;
                     }
 
-                    let appointmentDetailsObject = {
-                        confirmationMessage: confirmationMessage,
-                        center: center,
-                        date: date,
-                        time: time,
-                        preference: preference,
-                        name: name,
-                        photoIdToCarry: photoIdToCarry,
-                        referenceId: referenceId,
-                        instructions: instructions
+                    let details = detailsSel[1];
+                    let detailsObject = {
+                        details: details.innerText
                     }
-
-                    console.log(appointmentDetailsObject);
-                    return appointmentDetailsObject;
-                };
+                    
+                    return detailsObject;
+                }
 
                 let appointmentDetails = tab.evaluate(browserAppointmentDetails, "ion-grid[class='aadhar-otp-submit-form md hydrated']");
                 return appointmentDetails;
-            }).then(function(detailsObject) {
-                resolve(detailsObject);
+            }).then(function(details) {
+                resolve(details);
             }).catch(function() {
                 reject();
             });
     });
+}
+
+function sendConfirmationMail(appointmentDetails) {
+    return new Promise(function(resolve, reject) {
+        if(!appointmentDetails)
+            reject();
+
+        appointmentDetails = createMailBody(appointmentDetails);
+        let appointmentConfirmationMail = confirmationMail(appointmentDetails);
+        appointmentConfirmationMail
+            .then(function() {
+                resolve();
+            }).catch(function() {
+                reject();
+            })
+    })
+}
+
+function createMailBody(appointmentDetails) {
+    let detailsArr = appointmentDetails.split("\n");
+    detailsArr.shift();
+    detailsArr.pop();
+    appointmentDetails = detailsArr.join("\n");
+    return appointmentDetails;
 }
 
 console.log("After");
