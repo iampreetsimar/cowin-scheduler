@@ -4,14 +4,22 @@ cowin-scheduler is a `command line utility tool` that allows to automate registe
 
 ## Features
 
-* Schedule an appointment - Logins to the cowin portal, registers the user, schedules an appointment and sends a confirmation mail having the appointment details to the user's email address.
+* **Schedule an appointment** - Logins to the cowin portal, registers the user, schedules an appointment and sends a confirmation mail having the appointment details to the user's email address.
+```
 ![](scheduleAppointment-demo.gif)
+```
 
-* Cancel an appointment - Logins to the cowin portal, cancels the appointment and sends a confirmation mail about the cancellation to the user's email address.
+* **Cancel an appointment** - Logins to the cowin portal, cancels the appointment and sends a confirmation mail about the cancellation to the user's email address.
+```
+![](cancelAppointment-demo.gif)
+```
 
-* Delete User Details - Logins to the cowin portal, deletes the registered user from the portal and sends a confirmation mail about the user details deletion to the user's email address.
+* **Delete User Details** - Logins to the cowin portal, deletes the registered user from the portal and sends a confirmation mail about the user details deletion to the user's email address.
+```
+![](deleteUserDetails-demo.gif)
+```
 
-NOTE: The login is based on OTP based verification. During the script execution, user has to input the OTP received on his/her phone. The script will wait for 3 minutes(same as the portal) for this input.
+**NOTE**: The login is based on OTP based verification. During the script execution, user has to input the OTP received on his/her phone. The script will wait for 3 minutes(same as the portal) for this input.
 
 ## Prerequisites
 
