@@ -1,8 +1,8 @@
 {
   "name": "cowin-scheduler",
   "version": "1.0.0",
-  "description": "This utility registers the user for India's Covid Vaccination Drive using Co-Win Portal  and schedules the appointment",
-  "main": "index.html",
+  "description": "Command Line utility to automate registering a user on Cowin Portal, schedule/cancel appointments for Coivd vaccination and delete user details from the portal",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
