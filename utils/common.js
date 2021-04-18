@@ -1,4 +1,6 @@
 let puppeteer = require("puppeteer");
+let fs = require("fs");
+let path = require("path");
 
 /*
     INPUT - tab
@@ -110,11 +112,21 @@ function launchPuppeteer() {
     });
 }
 
+/*
+    INPUT - jsonFilePath
+    OUTPUT - reads json file and returns the userDetails object
+*/
+function readUserDetailsFromJson(jsonFilePath) {
+    let userDetails = JSON.parse(fs.readFileSync(jsonFilePath)).userDetails;
+    return userDetails;
+}
+
 module.exports = {
     logoutUser: logoutUser,
     typeOTP: typeOTP,
     waitAndClick: waitAndClick,
     waitAndType: waitAndType,
     sleep: sleep,
-    launchPuppeteer: launchPuppeteer
+    launchPuppeteer: launchPuppeteer,
+    readUserDetailsFromJson: readUserDetailsFromJson
 };

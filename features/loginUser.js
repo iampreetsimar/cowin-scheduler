@@ -1,27 +1,12 @@
-let puppeteer = require("puppeteer");
-let cowinPortalLoginPageUrl = "https://selfregistration.cowin.gov.in/";
+let { cowinPortalLoginPageUrl } = require("../utils/constants");
 let { waitAndClick, typeOTP, sleep } = require("../utils/common");
-let instance;
-let tab;
 
-function loginUser(data) {
+function loginUser(data, tab) {
     return new Promise(function(resolve, reject) {
-        let browserInstancePromise = puppeteer.launch({
-            headless: false,
-            defaultViewport: null,
-            args: ["--start-maximized"]
-        }) ;
-        
-        browserInstancePromise
-            .then(function(browserInstance) {
-                instance = browserInstance;
-                return browserInstance.pages();
-            }).then(function(tabs) {
-                tab = tabs[0];
-                let portalPagePromise = tab.goto(cowinPortalLoginPageUrl);
-                console.log("...opening register/signin user page");
-                return portalPagePromise;
-            }).then(function() {
+        let portalPagePromise = tab.goto(cowinPortalLoginPageUrl);
+        console.log("...opening register/signin user page");
+        portalPagePromise
+            .then(function() {
                 let inputPhonePromise = waitAndClick(tab, "#mat-input-0");
                 return inputPhonePromise;
             }).then(function() {

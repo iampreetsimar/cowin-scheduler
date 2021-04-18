@@ -20,8 +20,8 @@ module.exports = {
     },
     whatsappWebUrl: "https://web.whatsapp.com/",
     cowinPortalLoginPageUrl: "https://selfregistration.cowin.gov.in/",
-    whatsappConversationStarter: 
-        "Welcome to Cowin Scheduler. This bot can help you in scheduling an appointment for Covid Vaccination, cancel an existing appointment and deleting user details of a registered user on the Cowin Portal. Please Select - 1 : To schedule an appointment, 2 : To cancel your existing appointment, 3 : To delete your registered details, 0 : Exit \n"
+    whatsappContactName: "Mumma",
+    jsonFilePath: "./utils/userDetails.json"
 }
 
 /*
@@ -38,4 +38,7 @@ module.exports = {
     mat-radio-2-input - Male
     mat-radio-3-input - Female
     mat-radio-4-input - Others
+
+    // incoming message
+    document.querySelectorAll(".GDTQm.message-in ._24wtQ._2W7I-._1-U5A .copyable-text ._3-8er.selectable-text.copyable-text")
 */

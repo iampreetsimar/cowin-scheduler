@@ -1,229 +1,56 @@
-let puppeteer = require("puppeteer");
-let cowinPortalLoginPageUrl = "https://selfregistration.cowin.gov.in/";
-let instance;
-let tab;
 let { sendMail } = require("./appointmentMails");
-let { logoutUser } = require("../utils/common");
+let { logoutUser, waitAndClick, waitAndType, sleep } = require("../utils/common");
 let { confirmationMailSubject } = require("../utils/constants");
 
-let browserInstancePromise = puppeteer.launch({
-    headless: false,
-    defaultViewport: null,
-    args: ["--start-maximized"]
-}) ;
-
-browserInstancePromise
-    .then(function(browserInstance) {
-        instance = browserInstance;
-        return browserInstance.pages();
-    }).then(function(tabs) {
-        tab = tabs[0];
-        let portalPagePromise = tab.goto(cowinPortalLoginPageUrl);
-        console.log("...opening register/signin user page");
-        return portalPagePromise;
-    }).then(function() {
-        let inputPhonePromise = waitAndClick(tab, "#mat-input-0");
-        return inputPhonePromise;
-    }).then(function() {
-        console.log("...typing phone");
-        let typeNumberPromise = tab.type("#mat-input-0", "9999602530", { delay: 200 });
-        return typeNumberPromise;
-    }).then(function() {
-        console.log("...click on get OTP");
-        let getOTPPromise = waitAndClick(tab, ".covid-button-desktop.ion-text-center");
-        return getOTPPromise;
-    }).then(function() {
-        console.log("...waiting for OTP");
-        let otpPromise = waitAndClick(tab, "#mat-input-1");
-        return otpPromise;
-    }).then(function() {
-        console.log("...typing OTP");
-        let typeOTPPromise = typeOTP(tab);
-        return typeOTPPromise;
-    }).then(function() {
-        console.log("...click on verify OTP");
-        let verifyOTPPromise = waitAndClick(tab, "ion-button[class='next-btn vac-btn md button button-solid ion-activatable ion-focusable hydrated']");
-        return verifyOTPPromise;
-    }).then(function() {
-        console.log("...user logged in");
-        let selectIDPromise = selectPhotoIDInDropdown("mat-select-value-1", 5000, "mat-option-0");
-        return selectIDPromise;
-    }).then(function() {
-        console.log("...id chosen");
-        let typeIdPromise = waitAndType(tab, "input[formcontrolname='photo_id_number']", "666666666666");
-        return typeIdPromise;
-    }).then(function() {
-        console.log("...typing id number");
-        let typeNamePromise = waitAndType(tab, "input[formcontrolname='name']", "Simarpreet Singh");
-        return typeNamePromise;
-    }).then(function() {
-        console.log("...typing name");
-        let selectRadioPromise = selectRadio("mat-radio-4-input");
-        return selectRadioPromise;
-    }).then(function() {
-        console.log("...selected gender");
-        let typeBirthYearPromise = waitAndType(tab, "input[formcontrolname='birth_year']", "1961");
-        return typeBirthYearPromise;
-    }).then(function() {
-        console.log("...typing year");
-        let registerPromise = waitAndClick(tab, ".covid-button-desktop.ion-text-end.button-container .register-btn");
-        return registerPromise;
-    }).then(function() {
-        console.log("...user registered");
-        let sleepPromise = sleep(7000);
-        return sleepPromise;
-    }).then(function() {
-        let scheduleAppointment = waitAndClick(tab, ".btnlist.ng-star-inserted a");
-        return scheduleAppointment;
-    }).then(function() {
-        console.log("...clicked on schedule appointment");
-        let scheduleFinalPromise = waitAndClick(tab, ".covid-button-desktop.ion-text-end.book-btn");
-        return scheduleFinalPromise;
-    }).then(function() {
-        console.log("...clicked on schedule appointment final");
-        let searchByPincodePromise = waitAndType(tab, "input[formcontrolname='pincode']", "110008");
-        return searchByPincodePromise;
-    }).then(function() {
-        console.log("...typing pincode");
-        let searchButtonPromise = waitAndClick(tab, ".pin-search-btn.md.button.button-solid.ion-activatable.ion-focusable.hydrated");
-        return searchButtonPromise;
-    }).then(function() {
-        console.log("...search button clicked");
-        let selectCenterPromise = selectVaccinationCenter();
-        return selectCenterPromise;
-    }).then(function() {
-        console.log("...selected vaccination center");
-        let timeSlotPromise = selectTimeSlot();
-        return timeSlotPromise;
-    }).then(function() {
-        console.log("...selected time slot");
-        let confirmAppointmentPromise = waitAndClick(tab, ".covid-button-desktop.ion-text-end.book-btn.button-container__right .confirm-btn");
-        return confirmAppointmentPromise;
-    }).then(function() {
-        console.log("...appointment confirmed");
-        let appointmentDetails = getAppointmentDetails();
-        return appointmentDetails;
-    }).then(function(appointmentDetails) {
-        console.log("...sending appointment details on mail");
-        let sendAppointmentConfirmationMail = sendConfirmationMail(appointmentDetails.details);
-        return sendAppointmentConfirmationMail;
-    }).then(function() {
-        console.log("...confirmation mail sent");
-        let logoutPromise = logoutUser(tab);
-        return logoutPromise;
-    }).then(function() {
-        instance.close();
-    }).catch(function(err) {
-        console.log(err);
-    })
-
-/*
-    CUSTOM PROMISE FUNCTION
-    INPUT - selector
-    OUTPUT - waits for selector to appear on page and clicks on it
-*/
-function waitAndClick(selector, delayVal = 500) {
+function scheduleAppointment(data, tab) {
     return new Promise(function(resolve, reject) {
-        let waitForSelectorPromise = tab.waitForSelector(selector, { visible: true });
-        waitForSelectorPromise
+        let scheduleAppointmentPromise = waitAndClick(tab, ".btnlist.ng-star-inserted a");
+        scheduleAppointmentPromise
             .then(function() {
-                let waitForClickPromise = tab.click(selector, { delay: delayVal });
-                return waitForClickPromise;
+                console.log("...clicked on schedule appointment");
+                let scheduleFinalPromise = waitAndClick(tab, ".covid-button-desktop.ion-text-end.book-btn");
+                return scheduleFinalPromise;
             }).then(function() {
-                resolve();
-            }).catch(function() {
-                reject();
-            })
-    });
-}
-
-/*
-    CUSTOM PROMISE FUNCTION
-    INPUT - selector
-    OUTPUT - waits for selector to appear on page and types in it
-*/
-function waitAndType(selector, input) {
-    return new Promise(function(resolve, reject) {
-        let waitForClickSelectorPromise = waitAndClick(selector);
-        waitForClickSelectorPromise
-            .then(function() {
-                let typeInputPromise = tab.type(selector, input, { delay: 200 });
-                return typeInputPromise;
+                console.log("...clicked on schedule appointment final");
+                let searchByPincodePromise = waitAndType(tab, "input[formcontrolname='pincode']", data.pinCode);
+                return searchByPincodePromise;
             }).then(function() {
-                resolve();
-            }).catch(function() {
-                reject();
-            })
-    });
-}
-
-function typeOTP() {
-    return new Promise(function(resolve, reject) {
-        function waitForOTP() {
-            const otpInput = document.getElementById("mat-input-1");
-            return otpInput &&
-            otpInput.value.length == 6;
-        }
-
-        let OTPpromise = tab.waitForFunction(waitForOTP, { timeout: 180000 });
-        OTPpromise
-            .then(function() {
-                console.log("OTP filled");
-                resolve();
-            })
-    });
-}
-
-function sleep(time) {
-    return new Promise(function(resolve, reject) {
-        setTimeout(function() {
-            resolve();
-        }, time);
-    })
-}
-
-function selectPhotoIDInDropdown(selector, delayVal, idSelector) {
-    return new Promise(function(resolve, reject) {
-        
-        let sleepPromise = sleep(delayVal);
-        sleepPromise
-            .then(function() {
-                let waitForDropdownPromise = waitAndClick("#" + selector);
-                return waitForDropdownPromise;
+                console.log("...typing pincode");
+                let searchButtonPromise = waitAndClick(tab, ".pin-search-btn.md.button.button-solid.ion-activatable.ion-focusable.hydrated");
+                return searchButtonPromise;
             }).then(function() {
-                function browserFunction(idSelector) {
-                    let optionId = document.getElementById(idSelector);
-                    optionId.click();
-                }
-
-                let evaluatePromise = tab.evaluate(browserFunction, idSelector);
-                return evaluatePromise;      
+                console.log("...search button clicked");
+                let selectCenterPromise = selectVaccinationCenter(tab);
+                return selectCenterPromise;
             }).then(function() {
-                console.log("...selected ID");
+                console.log("...selected vaccination center");
+                let timeSlotPromise = selectTimeSlot(tab);
+                return timeSlotPromise;
             }).then(function() {
-                resolve();
-            }).catch(function() {
-                reject();
+                console.log("...selected time slot");
+                let confirmAppointmentPromise = waitAndClick(tab, ".covid-button-desktop.ion-text-end.book-btn.button-container__right .confirm-btn");
+                return confirmAppointmentPromise;
+            }).then(function() {
+                console.log("...appointment confirmed");
+                let appointmentDetails = getAppointmentDetails(tab);
+                return appointmentDetails;
+            }).then(function(appointmentDetails) {
+                console.log("...sending appointment details on mail");
+                let sendAppointmentConfirmationMail = sendConfirmationMail(appointmentDetails.details, data);
+                return sendAppointmentConfirmationMail;
+            }).then(function() {
+                console.log("...confirmation mail sent");
+                let logoutPromise = logoutUser(tab);
+                return logoutPromise;
+            }).then(function() {
+                resolve(confirmationMailSubject);
+            }).catch(function(err) {
+                reject(err);
             });
     });
 }
-
-function selectRadio(selector) {
-    return new Promise(function(resolve, reject) {
-        function selectRadioChoice(selector) {
-            let radioChoice = document.getElementById(selector);
-            radioChoice.click();
-        }
-          
-        let evaluatePromise = tab.evaluate(selectRadioChoice, selector);
-        evaluatePromise
-            .then(function() {
-                resolve();
-            });
-    });
-}
-
-function selectVaccinationCenter() {
+ 
+function selectVaccinationCenter(tab) {
     return new Promise(function(resolve, reject) {
         sleep(3000)
             .then(function() {
@@ -266,7 +93,7 @@ function selectVaccinationCenter() {
     })
 }
 
-function selectTimeSlot() {
+function selectTimeSlot(tab) {
     return new Promise(function(resolve, reject) {
         sleep(3000)
             .then(function() {
@@ -291,7 +118,7 @@ function selectTimeSlot() {
     });
 }
 
-function getAppointmentDetails() {
+function getAppointmentDetails(tab) {
     return new Promise(function(resolve, reject) {
         sleep(2000)
             .then(function() {
@@ -319,14 +146,14 @@ function getAppointmentDetails() {
     });
 }
 
-function sendConfirmationMail(appointmentDetails) {
+function sendConfirmationMail(appointmentDetails, receiverData) {
     return new Promise(function(resolve, reject) {
         if(!appointmentDetails)
             reject();
 
         appointmentDetails = createMailBody(appointmentDetails);
         let appointmentConfirmationMail = sendMail({ 
-            email: "simar94.singh@gmail.com", 
+            email: receiverData.email, 
             subject: confirmationMailSubject,
             mailBody: appointmentDetails 
         });
@@ -345,5 +172,9 @@ function createMailBody(appointmentDetails) {
     detailsArr.pop();
     appointmentDetails = detailsArr.join("\n");
     return appointmentDetails;
+}
+
+module.exports = {
+    scheduleAppointment: scheduleAppointment
 }
 
