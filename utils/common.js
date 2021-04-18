@@ -1,3 +1,5 @@
+let puppeteer = require("puppeteer");
+
 /*
     INPUT - tab
     OUTPUT - logs out user from the portal
@@ -73,12 +75,12 @@ function sleep(time) {
     INPUT - tab, selector, input to type
     OUTPUT - waits for selector to appear on page and types in it
 */
-function waitAndType(tab, selector, input) {
+function waitAndType(tab, selector, input, delayVal = 100) {
     return new Promise(function(resolve, reject) {
         let waitForClickSelectorPromise = waitAndClick(tab, selector);
         waitForClickSelectorPromise
             .then(function() {
-                let typeInputPromise = tab.type(selector, input, { delay: 100 });
+                let typeInputPromise = tab.type(selector, input, { delay: delayVal });
                 return typeInputPromise;
             }).then(function() {
                 resolve();
@@ -88,10 +90,31 @@ function waitAndType(tab, selector, input) {
     });
 }
 
+/*
+    OUTPUT - starts chromium window using puppeteer and returns browser instance
+*/
+function launchPuppeteer() {
+    return new Promise(function(resolve, reject) {
+        let launchPromise = puppeteer.launch({
+            headless: false,
+            defaultViewport: null,
+            args: ["--start-maximized"]
+        });
+
+        launchPromise
+            .then(function(launchPromise) {
+                resolve(launchPromise);
+            }).catch(function(err) {
+                reject(err);
+            });
+    });
+}
+
 module.exports = {
     logoutUser: logoutUser,
     typeOTP: typeOTP,
     waitAndClick: waitAndClick,
     waitAndType: waitAndType,
-    sleep: sleep
+    sleep: sleep,
+    launchPuppeteer: launchPuppeteer
 };

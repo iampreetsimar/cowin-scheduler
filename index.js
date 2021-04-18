@@ -2,6 +2,25 @@ let { cancelAppointment } = require("./features/cancelAppointment");
 let { deleteUserDetails } = require("./features/deleteUserDetails");
 let { loginUser } = require("./features/loginUser");
 let { registerUser } = require("./features/registerUser");
+let { initiateWhatsappBot } = require("./features/whatsappBot");
+let { launchPuppeteer } = require("./utils/common");
+
+
+
+
+(async function startup() {
+    try {
+        let browserInstance = await launchPuppeteer();
+        let tabs = await browserInstance.pages();
+        let tab = tabs[0]; // current tab
+    
+        await initiateWhatsappBot(tab);
+
+        // close browser instance
+    } catch(err) {
+        console.log(err.message);
+    }
+})();
 
 async function cancellation() {
     let response;
@@ -15,7 +34,7 @@ async function cancellation() {
     }
 }; 
 
-(async function deleteUser() {
+async function deleteUser() {
     let response;
     try {
         response = await deleteUserDetails({ phone: "9999602530", email: "simar94.singh@gmail.com" });
@@ -25,7 +44,7 @@ async function cancellation() {
     } finally {
         return response;
     }
-})(); 
+}; 
 
 async function login() {
     let response;
@@ -56,4 +75,8 @@ async function register() {
         return response;
     }
 }; 
+
+async function schedule() {
+    
+}
 
