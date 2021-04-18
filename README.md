@@ -40,11 +40,11 @@ User has to create a json file in the `utils/userDetails.json` path. The JSON fi
 {
     "userDetails": {
         "phone": "xxxxxxxxxx", 
-        "photoId": "AadhaarCard/DrivingLicense/PANCard/Passport/PensionPassbook/NPRSmartCard/VoterIDCard",   -- Choose any one in the same format
+        "photoId": "AadhaarCard/DrivingLicense/PANCard/Passport/PensionPassbook/NPRSmartCard/VoterIDCard", --> Choose any one in the same format
         "photoIdNumber": "xxxxxxxxxxxx",  --> Valid ID number
         "name": "your name",
         "gender": "Male/Female/Others",
-        "birthYear": "YYYY", -- User must be greater than 45 years old in order to schedule appointment on cowin portal as of now
+        "birthYear": "YYYY", --> User must be greater than 45 years old in order to schedule an appointment on cowin portal as of now
         "pinCode": "xxxxxx",
         "email": "your email address"
     }
@@ -79,8 +79,8 @@ IN PROGRESS : A whatsapp bot will be added in the next iteration to use this uti
 
 ## Contact
 
-If you want to contact me you can reach me at <iampreetsimar@gmail.com>.
+If you want to contact, you can reach me at <iampreetsimar@gmail.com>.
 
 ## NOTE
 
-This project was created as part of a hackathon over a weekend. If you think a feature should be added to this, please feel free to reach out to me and we can have a discussion on it. Do note that after scheduling an appointment using this tool, I urge to cancel your appointment(you can use the utility itself to do this) if you're not actually interested to go through it, otherwise it will be a waste of govt resources.
+This project was created as part of a hackathon over a weekend. If you think a feature should be added to this, please feel free to reach out to me and we can have a discussion. Do note that after scheduling an appointment using this tool, I urge to cancel your appointment(you can use the utility itself to do this) if you're not actually interested to go through it, otherwise it will be a waste of govt resources.
