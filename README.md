@@ -76,14 +76,6 @@ node index.js deleteUserDetails
 node index.js help
 ```
 
-## Future updates
-
-IN PROGRESS : A whatsapp bot will be added in the next iteration to use this utility.
-
-## Contact
-
-If you want to contact, you can reach me at <iampreetsimar@gmail.com>.
-
 ## NOTE
 
-This project was created as part of a hackathon over a weekend. If you think a feature should be added to this, please feel free to reach out to me and we can have a discussion. Do note that after scheduling an appointment using this tool, I urge to cancel your appointment(you can use the utility itself to do this) if you're not actually interested to go through it, otherwise it will be a waste of govt resources.
+This project was created as part of a hackathon over a weekend.
